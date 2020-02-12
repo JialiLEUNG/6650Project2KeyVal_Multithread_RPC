@@ -42,6 +42,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
@@ -73,15 +74,15 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1581537953593</updated>
-      <workItem from="1581537958147" duration="515000" />
+      <workItem from="1581537958147" duration="775000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="515000" />
+    <option name="totallyTimeSpent" value="775000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="61" y="276" width="1373" height="644" extended-state="0" />
+    <frame x="38" y="403" width="1373" height="449" extended-state="0" />
     <layout>
       <window_info id="Image Layers" />
       <window_info id="Designer" />
@@ -93,7 +94,7 @@
       <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" />
       <window_info anchor="bottom" id="Version Control" />
-      <window_info active="true" anchor="bottom" id="Terminal" visible="true" weight="0.9456522" />
+      <window_info active="true" anchor="bottom" id="Terminal" visible="true" weight="0.9159664" />
       <window_info anchor="bottom" id="Event Log" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
