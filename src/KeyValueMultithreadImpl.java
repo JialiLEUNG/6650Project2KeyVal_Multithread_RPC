@@ -125,41 +125,50 @@ public class KeyValueMultithreadImpl extends UnicastRemoteObject implements KeyV
         String action = requestArr[0]; // get, put, delete
         String key = requestArr[1];
 
+        String msg;
+
         switch(action.toLowerCase()) { // normalize operation to lowercase.
             case "get":
                 if(store.containsKey(key)){
                     String price = store.get(key);
-                    return "Price of " + key + ": " + price + " at time " + System.currentTimeMillis();
+                    msg = "Price of " + key + ": " + price + " at time " + System.currentTimeMillis();
+                    break;
                 }
-                return "Error + " + key + " not found. Malformed Request from [consumer ]. at time " + System.currentTimeMillis();
+                msg = "Error + " + key + " not found. Malformed Request from [consumer ]. at time " + System.currentTimeMillis();
                 break;
             case "delete":
                 if (!store.containsKey(key)) {
-                    return key + " not found. Malformed Request from [consumer ]. at time " + System.currentTimeMillis();
+                    msg = key + " not found. Malformed Request from [consumer ]. at time " + System.currentTimeMillis();
+                    break;
                 }
 
                 store.remove(key);
-                return "Delete " + key + " succeed. " + "at time " + System.currentTimeMillis();
 
+                msg = "Delete " + key + " succeed. " + "at time " + System.currentTimeMillis();
                 break;
+
             case "put":
                 if (requestArr.length == 3) {
                     if (isNumeric(requestArr[2])){
                         store.put(key, requestArr[2]);
-                        return "Put [" + key + ", " + requestArr[2] + "] in store succeed. " + "at time " + System.currentTimeMillis();
+                        msg =  "Put [" + key + ", " + requestArr[2] + "] in store succeed. " + "at time " + System.currentTimeMillis();
+                        break;
                     }
-                    return "Error: Value should be numeric. At time: " + System.currentTimeMillis();
+                    msg = "Error: Value should be numeric. At time: " + System.currentTimeMillis();
+                    break;
                     }
                 else{
-                    return "Error: Malformed Request from [consumer ]." +
+                    msg = "Error: Malformed Request from [consumer ]." +
                             "Syntax of put: <operation> <key> <value>. For example: put apple 10. At time " + System.currentTimeMillis();
                     break;
                 }
 
             default:
-                return "Error: Malformed Request from [consumer "  +
+                msg = "Error: Malformed Request from [consumer "  +
                         "Syntax: <operation> <key>.... At time " + System.currentTimeMillis();
+                break;
         }
+        return msg;
     }
 
 
