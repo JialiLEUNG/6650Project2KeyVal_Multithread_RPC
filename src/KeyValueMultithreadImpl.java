@@ -16,22 +16,150 @@
  Author: Jiali Liang
  */
 
+import java.io.*;
 import java.lang.Thread;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.Socket;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class KeyValueMultithreadImpl extends UnicastRemoteObject implements KeyValueMultithread
 {
-    private static final long serialVersionUID = -7574367988592496327L;
-    private volatile int counter = 0;
-    private final int MAXCOUNT = 900000;
+//    private static final long serialVersionUID = -7574367988592496327L;
+//    private volatile int counter = 0;
+//    private final int MAXCOUNT = 900000;
+
+    /* Server information */
+    protected boolean       isStopped = false; // whether the server is terminated.
+    protected Thread        runningThread = null;
+    private Map<String, String> store = new HashMap<>();
 
 
     public KeyValueMultithreadImpl() throws RemoteException {
         super();
+    }
+
+    public void start(){
+        // only one thread can access the resource at a given point of time
+        synchronized (this){
+            // Thread.currentThread() returns a reference to the currently executing thread object.
+            this.runningThread = Thread.currentThread();
+        }
+
+        while(!isStopped()){
+            try{
+                System.out.println("Server starts to process request...");
+                processClientRequest();
+                try {
+                    Thread.sleep (1 + (int) (Math.random () * 1000));
+                } catch (InterruptedException e) {
+                    /* If we were interrupted, go ahead and end thread */
+                    break;
+                }
+            } catch (Exception e){
+                System.err.println(e.getMessage());
+            }
+        }
+    }
+
+    private synchronized boolean isStopped(){
+        return this.isStopped;
+    }
+
+    private synchronized void processClientRequest(String input) throws Exception{
+        // once client is connected, use socket stream to send a prompt to client
+//        OutputStream output = clientSocket.getOutputStream();
+//        PrintWriter writer = new PrintWriter(output, true);
+//        // Prompt for client to enter something.
+//        writer.println("Please type your request and enter: \n");
+
+        // Create a InputStream  and BufferedReader for reading from socket
+//        InputStream input = clientSocket.getInputStream();
+//        BufferedReader reader = new BufferedReader(new InputStreamReader((input)));
+//        while(clientSocket.isConnected()){
+//            String res = reader.readLine().trim();
+//            System.out.println("===== Client: " + res); // print message from client.
+//
+//            // echo client message to client.
+//            InetAddress clientAddress = clientSocket.getInetAddress();
+//            int clientPort = clientSocket.getPort();
+//            String[] requestArr = res.split(" ");
+//            keyValService(writer, requestArr, clientAddress, clientPort);
+//        }
+        while(true){
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+            String res = input.trim();
+            System.out.println("===== Client: " + res);
+            String[] requestArr = res.split(" ");
+            keyValService(requestArr);
+
+        }
+
+    }
+
+
+    /**
+     * keyValService() implements protocol for client's request:
+     * Client should follow the format: <operation> <key> for get and delete.
+     * For example, get apple, delete apple.
+     * Client should follow the format: <operation> <parameter> <parameter> for put.
+     * For example, put apple 10.
+//     * @param writer socket stream for sending message to client.
+     * @param requestArr String[] client's request sentence.
+//     * @param clientAddress InetAddress client's IP address.
+//     * @param clientPort int client's port.
+     * @throws IOException
+     */
+    private String keyValService(String[] requestArr) throws IOException {
+        if (requestArr.length < 2){
+            String msg = "Error: Malformed Request from [consumer ]." +
+                    " Syntax: <operation> <key> OR <operation> <key> <value>. For example: get apple";
+         return msg + " at time: " + System.currentTimeMillis();
+        }
+
+        String action = requestArr[0]; // get, put, delete
+        String key = requestArr[1];
+
+        switch(action.toLowerCase()) { // normalize operation to lowercase.
+            case "get":
+                if(store.containsKey(key)){
+                    String price = store.get(key);
+                    return "Price of " + key + ": " + price + " at time " + System.currentTimeMillis();
+                }
+                return "Error + " + key + " not found. Malformed Request from [consumer ]. at time " + System.currentTimeMillis();
+                break;
+            case "delete":
+                if (!store.containsKey(key)) {
+                    return key + " not found. Malformed Request from [consumer ]. at time " + System.currentTimeMillis();
+                }
+
+                store.remove(key);
+                return "Delete " + key + " succeed. " + "at time " + System.currentTimeMillis();
+
+                break;
+            case "put":
+                if (requestArr.length == 3) {
+                    if (isNumeric(requestArr[2])){
+                        store.put(key, requestArr[2]);
+                        return "Put [" + key + ", " + requestArr[2] + "] in store succeed. " + "at time " + System.currentTimeMillis();
+                    }
+                    return "Error: Value should be numeric. At time: " + System.currentTimeMillis();
+                    }
+                else{
+                    return "Error: Malformed Request from [consumer ]." +
+                            "Syntax of put: <operation> <key> <value>. For example: put apple 10. At time " + System.currentTimeMillis();
+                    break;
+                }
+
+            default:
+                return "Error: Malformed Request from [consumer "  +
+                        "Syntax: <operation> <key>.... At time " + System.currentTimeMillis();
+        }
     }
 
 
@@ -47,10 +175,10 @@ public class KeyValueMultithreadImpl extends UnicastRemoteObject implements KeyV
         Thread p = Thread.currentThread();
 
         System.out.println("[server] Entering critical section: " + p.getName());
-        for (i = 0; i < MAXCOUNT; i++)
-            this.counter++;
-        for (i = 0; i < MAXCOUNT; i++)
-            this.counter--;
+//        for (i = 0; i < MAXCOUNT; i++)
+//            this.counter++;
+//        for (i = 0; i < MAXCOUNT; i++)
+//            this.counter--;
         System.out.println("[server] Leaving critical section: " + p.getName());
 
     }
@@ -62,6 +190,25 @@ public class KeyValueMultithreadImpl extends UnicastRemoteObject implements KeyV
      */
     public synchronized int read() {
         // public int read() {
-        return this.counter;
+//        return this.counter;
+    }
+
+
+    /**
+     * isNumeric() checks if user request of "PUT" contains numeric value.
+     * For example, "put apple 0" is valid, whereas "put apple zero" is invalid.
+     * @param strNum
+     * @return
+     */
+    public static boolean isNumeric(String strNum) {
+        if (strNum == null) {
+            return false;
+        }
+        try {
+            Integer.parseInt(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
     }
 }

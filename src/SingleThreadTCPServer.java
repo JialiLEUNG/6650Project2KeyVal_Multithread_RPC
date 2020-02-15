@@ -195,23 +195,7 @@ public class SingleThreadTCPServer implements Runnable{
         }
     }
 
-    /**
-     * isNumeric() checks if user request of "PUT" contains numeric value.
-     * For example, "put apple 0" is valid, whereas "put apple zero" is invalid.
-     * @param strNum
-     * @return
-     */
-    public static boolean isNumeric(String strNum) {
-        if (strNum == null) {
-            return false;
-        }
-        try {
-            Integer.parseInt(strNum);
-        } catch (NumberFormatException nfe) {
-            return false;
-        }
-        return true;
-    }
+
 
     public static void main(String args[]) throws Exception{
         if (args.length < 1) {
